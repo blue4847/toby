@@ -11,6 +11,7 @@ public class UserDaoTest {
 
 	// for test
 	public static void main(String[] args) throws ClassNotFoundException, SQLException{
+		// this is my 2nd time commit
 		
 		ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 		
@@ -20,12 +21,12 @@ public class UserDaoTest {
 		 * @param : class type for generic return
 		 */
 		UserDao dao = context.getBean("userDao", UserDao.class);
+
 		/*
 		 * DI
 		DaoFactory daoFactory = new DaoFactory();
 		dao = daoFactory.userDao();
-		*/
-
+		*/ 
 		User user = new User();
 		user.setId("whiteShip");
 		user.setName("백기선");
