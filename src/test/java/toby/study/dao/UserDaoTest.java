@@ -12,6 +12,7 @@ public class UserDaoTest {
 	// for test
 	public static void main(String[] args) throws ClassNotFoundException, SQLException{
 		// this is my 2nd time commit
+		// differ test
 		
 		ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
 		
@@ -35,9 +36,12 @@ public class UserDaoTest {
 		System.out.println(user.getId() + " 등록 성공");
 
 		User user2  = dao.get(user.getId());
+
 		System.out.println(user2.getName());
+
 		System.out.println(user2.getPassword());
 
 		System.out.println(user.getId() + " 조회 성공");
+		// this is my 3rd commit
 	}
 }
