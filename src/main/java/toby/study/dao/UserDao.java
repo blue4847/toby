@@ -17,12 +17,7 @@ public class UserDao {
 	 */
 	private ConnectionMaker connectionMaker;
 
-	/**
-	 * UserDao Constructor
-	 * @param connectionMaker
-	 */
-	public UserDao(ConnectionMaker connectionMaker) {
-		/** DI ConnectionMaker */
+	public void setConnectionMaker(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
 
