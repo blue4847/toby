@@ -20,16 +20,9 @@ public class UserDao {
 	/** dataSource interface */
 	private DataSource dataSource;
 
-	public ConnectionMaker getConnectionMaker() {
-		return connectionMaker;
-	}
-
+	// -- DI methods 
 	public void setConnectionMaker(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
-	}
-
-	public DataSource getDataSource() {
-		return dataSource;
 	}
 
 	public void setDataSource(DataSource dataSource) {
