@@ -15,7 +15,7 @@ public class UserDaoConnectionCountingTest {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext( CountingDaoFactory.class);
 		
 		UserDao dao = context.getBean("userDao", UserDao.class); 
-		
+
 		/**
 		 * DAO 사용 코드
 		 */
