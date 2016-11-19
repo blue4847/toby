@@ -66,7 +66,7 @@ public class UserDao {
 	 * @throws ClassNotFoundException
 	 * @throws SQLException
 	 */
-	public User get(String id) throws ClassNotFoundException, SQLException {
+	public User get(String id) throws SQLException {
 		
 		// Connection from dataSource
 		Connection c = dataSource.getConnection(); 

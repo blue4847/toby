@@ -11,19 +11,12 @@ public class UserDaoTest {
 
 	// for test
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
-		// this is my 2nd time commit
-		// differ test
-
-		// ApplicationContext context = new
-		// AnnotationConfigApplicationContext(DaoFactory.class);
 
 		// set XML for DI-Setting info
 		ApplicationContext context = new GenericXmlApplicationContext(
 				new String[] { "/META-INF/toby-chap01-context.xml", "/META-INF/spring-connection.xml" });
 		// relational class path; this code not work
-		// ApplicationContext context = new
-		// ClassPathXmlApplicationContext("/META-INF/toby-chap01-context.xml",
-		// BaseClassName.class);
+		// ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/toby-chap01-context.xml", // BaseClassName.class);
 
 		/**
 		 * dependency lookup
