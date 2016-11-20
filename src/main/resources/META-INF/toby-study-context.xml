@@ -6,11 +6,13 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
 		http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd"> 
-
+	
 	<!-- UserDao -->
 	<bean id="userDao" class="toby.study.dao.UserDao">
 		<property name="connectionMaker" ref="connectionMaker"> 
 		</property>
+
+		<!-- dataSource : spring-connection.xml -->
 		<property name="dataSource" ref="dataSource"> 
 		</property>
 	</bean>

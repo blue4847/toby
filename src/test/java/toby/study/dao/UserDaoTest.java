@@ -14,7 +14,7 @@ public class UserDaoTest {
 
 		// set XML for DI-Setting info
 		ApplicationContext context = new GenericXmlApplicationContext(
-				new String[] { "/META-INF/toby-chap01-context.xml", "/META-INF/spring-connection.xml" });
+				new String[] { "/META-INF/toby-test-context.xml", "/META-INF/spring-connection.xml" });
 		// relational class path; this code not work
 		// ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/toby-chap01-context.xml", // BaseClassName.class);
 
@@ -29,8 +29,8 @@ public class UserDaoTest {
 		UserDao dao = context.getBean("userDao", UserDao.class);
 
 		/*
-		 * DI DaoFactory daoFactory = new DaoFactory(); dao =
-		 * daoFactory.userDao();
+		 * DI DaoFactory daoFactory = new DaoFactory(); 
+		 * dao = daoFactory.userDao();
 		 */
 		User user = new User();
 		user.setId("whiteShip");

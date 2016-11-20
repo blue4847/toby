@@ -9,18 +9,23 @@ import javax.sql.DataSource;
 
 import toby.study.domain.User;
 
+/**
+ * Application Component<br>
+ * @author blue4
+ */
 public class UserDao {
 
 	private String INSERT = "INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)";
 	private String SELECT = "select * from users where id = ?";
 
+	/** DI property area */
+	/** UserDao의 관심영역 외의 로직, Object는 외부로부터 DI받아 사용 */
 	/** ConnectionMaker interface */
 	private ConnectionMaker connectionMaker;
 
 	/** dataSource interface */
 	private DataSource dataSource;
 
-	// -- DI methods 
 	public void setConnectionMaker(ConnectionMaker connectionMaker) {
 		this.connectionMaker = connectionMaker;
 	}
@@ -29,9 +34,9 @@ public class UserDao {
 		this.dataSource = dataSource;
 	}
 
+	/** Business logic area */
 	/**
 	 * Add User Scheme
-	 * 
 	 * @param user
 	 * @throws SQLException
 	 */
@@ -53,7 +58,6 @@ public class UserDao {
 
 	/**
 	 * Get User Scheme
-	 * 
 	 * @param id
 	 * @return
 	 * @throws ClassNotFoundException
