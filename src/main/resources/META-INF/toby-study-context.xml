@@ -16,4 +16,11 @@
 		<property name="dataSource" ref="dataSource"> 
 		</property>
 	</bean>
+	
+	<bean id="countingUserDao" class="toby.study.dao.UserDao">
+
+		<!-- dataSource : spring-connection.xml -->
+		<property name="dataSource" ref="countingDataSource"> 
+		</property>
+	</bean>
 </beans>

@@ -5,21 +5,45 @@ import static org.junit.Assert.assertThat;
 
 import java.sql.SQLException;
 
+import javax.annotation.Resource;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import org.junit.runner.RunWith;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import toby.study.domain.User;
 
+/**
+ * @Runwith : 
+ *  Spring의 테스트 컨텍스트 프레임워크의 JUnit 확장기능 지정
+ *  ApplicationContext를 관리
+ * @ContextConfiguration :
+ *  테스트 컨텍스트가 자동으로 만들어 줄 ApplicationContext의 위치 지정
+ * @author blue4
+ *
+ */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"})
 public class UserDaoTest {
 
 	public static void main(String... strings) {
 		JUnitCore.main("toby.study.dao.UserDaoTest");
 	}
 
+	/**
+	 * ApplicationContext VS Factory class <br>
+	 * 1. 클라이언트는 구체적인 Factory 클래스를 알 필요가 없다
+	 * 2. ApplicationContext는 종합 IoC 서비스를 제공해준다
+	 * 3. ApplicationContext는 빈을 검색하는 다양한 방법을 제공한다
+	 * 
+	 * @see toby spring 100p
+	 */
+	
+	@Resource(name="userDao")
 	private UserDao dao;
 
 	private User user1;
@@ -27,37 +51,7 @@ public class UserDaoTest {
 	private User user3;
 
 	@Before
-	public void setUp() {
-		/**
-		 * ApplicationContext VS Factory class <br>
-		 * 1. 클라이언트는 구체적인 Factory 클래스를 알 필요가 없다
-		 * 2. ApplicationContext는 종합 IoC 서비스를 제공해준다
-		 * 3. ApplicationContext는 빈을 검색하는 다양한 방법을 제공한다
-		 * 
-		 * @see toby spring 100p
-		 */
-		// ApplicationContext
-		// 1. Factory class
-		// ApplicationContext context = new
-		// AnnotationConfigApplicationContext(DaoFactory.class);
-
-		// 2. XML context file : absolute location
-		ApplicationContext context = new GenericXmlApplicationContext(
-				new String[] { "/META-INF/toby-study-context.xml", "/META-INF/spring-connection.xml" });
-
-		// 3. XML context file : relational class path with Class
-		// ApplicationContext context = new
-		// ClassPathXmlApplicationContext("/META-INF/toby-chap01-context.xml",
-		// // BaseClassName.class);
-		/**
-		 * dependency lookup
-		 * 
-		 * @param : bean ID
-		 *            name of context method
-		 * @param : bean class
-		 *            class type for generic return
-		 */
-		this.dao = context.getBean("userDao", UserDao.class);
+	public void setUp() { 
 
 		user1 = new User("homuhomu", "호무라", "pw00");
 		user2 = new User("madoka", "마도카", "pw11");
@@ -71,11 +65,6 @@ public class UserDaoTest {
 		// test deleteAll
 		dao.deleteAll();
 		assertThat(dao.getCount(), is(0));
-
-		/*
-		 * DI DaoFactory daoFactory = new DaoFactory(); dao =
-		 * daoFactory.userDao();
-		 */
 
 		// test getCount
 		dao.add(user1);
