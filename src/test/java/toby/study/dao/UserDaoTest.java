@@ -11,11 +11,24 @@ public class UserDaoTest {
 
 	// for test
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
+		
+		/**
+		 * ApplicationContext VS Factory class
+		 * 1. 클라이언트는 구체적인 Factory 클래스를 알 필요가 없다
+		 * 2. ApplicationContext는 종합 IoC 서비스를 제공해준다
+		 * 3. ApplicationContext는 빈을 검색하는 다양한 방법을 제공한다
+		 * @see toby spring 100p
+		 */
 
-		// set XML for DI-Setting info
+		// ApplicationContext
+		// 1. Factory class
+//		ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
+
+		// 2. XML context file : absolute location
 		ApplicationContext context = new GenericXmlApplicationContext(
 				new String[] { "/META-INF/toby-test-context.xml", "/META-INF/spring-connection.xml" });
-		// relational class path; this code not work
+
+		// 3. XML context file : relational class path with Class
 		// ApplicationContext context = new ClassPathXmlApplicationContext("/META-INF/toby-chap01-context.xml", // BaseClassName.class);
 
 		/**
