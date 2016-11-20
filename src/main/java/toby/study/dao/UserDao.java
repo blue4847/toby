@@ -7,6 +7,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.EmptyResultDataAccessException;
+
 import toby.study.domain.User;
 
 /**
@@ -70,17 +72,51 @@ public class UserDao {
 		PreparedStatement ps = c.prepareStatement(SELECT);
 		ps.setString(1, id);
 		ResultSet rs = ps.executeQuery();
-		rs.next();
-		User user = new User();
-		user.setId(rs.getString("id"));
-		user.setName(rs.getString("name"));
-		user.setPassword(rs.getString("password"));
+
+		User user = null;
+		if(rs.next()){
+			user = new User();
+			user.setId(rs.getString("id"));
+			user.setName(rs.getString("name"));
+			user.setPassword(rs.getString("password"));
+		}
 
 		rs.close();
 		ps.close();
 		c.close();
+		
+		// 습득 데이터가 없는지 확인 후, 예외를 던져준다
+		if(user == null) throw new EmptyResultDataAccessException(1);
 
 		return user;
+	}
+	
+	public void deleteAll() throws SQLException{
+		
+		Connection c = dataSource.getConnection();
+		
+		PreparedStatement ps = c.prepareStatement("DELETE FROM USERS");
+		
+		ps.executeUpdate(); 
+		ps.close(); 
+		c.close();
+		
+	}
+	
+	public int getCount() throws SQLException{
+		Connection c = dataSource.getConnection();
+		
+		PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM USERS");
+		
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+		int count = rs.getInt(1);
+		
+		ps.executeUpdate(); 
+		ps.close(); 
+		c.close();
+		
+		return count;
 	}
 
 }
