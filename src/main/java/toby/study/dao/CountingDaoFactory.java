@@ -1,7 +1,10 @@
 package toby.study.dao;
 
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 /**
  * Factory class<br>
@@ -12,31 +15,37 @@ import org.springframework.context.annotation.Configuration;
 public class CountingDaoFactory {
 	
 	/**
-	 * @ConnectionMaer CountingConnectionMaker
+	 * @DataSource CountingConnectionMaker
 	 * @return UserDao
 	 */
 	@Bean
 	public UserDao userDao(){
 		UserDao userDao = new UserDao();
-		userDao.setConnectionMaker(connectionMaker());
+		userDao.setDataSource(dataSource());
 		return userDao;
 	}
 	
 	/**
-	 * @ConnectionMaker SimpleConnectionMaker
-	 * @return CountingConnectionMaker
+	 * @DataSource SimpleDriverDataSource
+	 * @return CountingDataSource
 	 */
 	@Bean
-	public ConnectionMaker connectionMaker(){
-		return new CountingConnectionMaker( realConnectionMaker());
+	public DataSource dataSource(){
+		CountingDataSource countingDataSource = new CountingDataSource();
+		countingDataSource.setDataSource(realDataSource());
+		return countingDataSource;
 	}
 	
 	/**
-	 * @return SimpleConnectionMaker
+	 * @return SimpleDriverDataSource
 	 */
 	@Bean
-	public ConnectionMaker realConnectionMaker(){
-		return new SimpleConnectionMaker();
-	}
-
+	public DataSource realDataSource(){
+		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
+		dataSource.setUrl("url");
+		dataSource.setDriverClass(org.mariadb.jdbc.Driver.class);
+		dataSource.setUsername("userName");
+		dataSource.setPassword("password");
+		return dataSource; 
+	} 
 }

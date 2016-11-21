@@ -1,7 +1,10 @@
 package toby.study.dao;
 
+import javax.sql.DataSource;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 /**
  * Component의 구조와 관계를 정의한 설정 정보.<br>
@@ -21,15 +24,20 @@ public class DaoFactory {
 	@Bean
 	public UserDao userDao(){
 		UserDao userDao = new UserDao();
-		userDao.setConnectionMaker(connectionMaker());
+		userDao.setDataSource(dataSource());
 		return userDao;
 	}
 	
 	/**
-	 * @return SimpleConnectionMaker
+	 * @return SimpleDriverDataSource
 	 */
 	@Bean
-	public ConnectionMaker connectionMaker(){ 
-		return new SimpleConnectionMaker();
+	public DataSource dataSource(){ 
+		SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
+		dataSource.setUrl("url");
+		dataSource.setDriverClass(org.mariadb.jdbc.Driver.class);
+		dataSource.setUsername("userName");
+		dataSource.setPassword("password");
+		return dataSource; 
 	} 
 }
