@@ -16,7 +16,7 @@ import toby.study.domain.User;
  * 
  * @author blue4
  */
-public class UserDao {
+public abstract class UserDao {
 
 	private String INSERT = "INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)";
 	private String SELECT = "select * from users where id = ?";
@@ -141,7 +141,7 @@ public class UserDao {
 
 		try{
 			c = dataSource.getConnection();
-			ps = c.prepareStatement("DELETE FROM USERS");
+			ps = makeStatement(c);
 			ps.executeUpdate();
 		}
 		catch( SQLException se){
@@ -207,5 +207,7 @@ public class UserDao {
 			}
 		} 
 	}
+	
+	abstract PreparedStatement makeStatement(Connection c) throws SQLException;
 
 }
