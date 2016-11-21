@@ -26,6 +26,11 @@ import toby.study.domain.User;
  *  해당 클래스의 테스트에서 ApplicationContext의 상태를 변경한다는 것을 알림
  *  테스트 컨텍스트는 이 해당 클래스에서의 ApplicationContext의 공유를 허락하지 않음
  *  테스트 메소드를 수행하고 나면 매번 새로운 ApplicationContext를 생성하여 다음 테스트가 사용하도록 함
+ *  
+ * @test CountingDataSource 작동 확인
+ * @test ApplicationContext에서 DI받은 Object가 singleton인가를 확인
+ * @test ApplicationContext 에서 DI받은 Object가 동일한 Object인가를 확인
+ *  
  * @author blue4
  *
  */
@@ -58,9 +63,14 @@ public class UserDaoConnectionCountingTest {
 		user2 = new User("madoka", "마도카", "pw11");
 		user3 = new User("mamiru", "마미", "pw22");
 
+		// singleton object인가를 확인하기 위해, 1회 카운트
 		countingUserDao.get(user1.getId());
 	}
 
+	/**
+	 * ApplicationContext로부터 DI받은 CountingDataSource가 동일한 Object인가를 확인
+	 * @throws SQLException
+	 */
 	@Test
 	public void countingDataSourceAndSingletonCheck1() throws SQLException { 
 		initCounter = counter++;
@@ -86,10 +96,15 @@ public class UserDaoConnectionCountingTest {
 		
 	} 
 	
+	/**
+	 * @Before에서 실행한 카운트가 반영되었는가를 확인
+	 * @throws SQLException
+	 */
 	@Test
 	public void countingDataSourceAndSingletonCheck2() throws SQLException {
+		
 		countingUserDao.get(user1.getId());
-		assertThat(countingDataSource.getCounter(), not(initCounter));
+		assertThat(countingDataSource.getCounter(), not(initCounter+1));
 
 	}
 
