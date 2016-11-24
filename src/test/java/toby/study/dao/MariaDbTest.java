@@ -26,7 +26,7 @@ public class MariaDbTest {
 	private ApplicationContext context;
 
 	@Test
-	public void connection(String[] args) throws SQLException {
+	public void connection() throws SQLException {
 		// set context
 
 		// get DataSource
