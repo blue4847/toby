@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import toby.study.dao.strategy.AddStatement;
 import toby.study.dao.strategy.DeleteAllStatement;
 import toby.study.domain.User;
 
@@ -37,41 +38,14 @@ public class UserDao {
 	 * @throws SQLException
 	 */
 	public void add( User user) throws SQLException {
+		/** micro DI */
+		
+		// Create object of strategy made for this method
+		StatementStrategy stmt = new AddStatement( user);
+		
+		// call context, transfer strategy object
+		this.jdbcContextWithStatementStrategy(stmt);
 
-		Connection c = null;
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-
-		try{
-			c = dataSource.getConnection();
-			ps = c.prepareStatement(INSERT);
-			ps.setString(1, user.getId());
-			ps.setString(2, user.getName());
-			ps.setString(3, user.getPassword());
-
-			ps.executeUpdate();
-
-		}
-		catch( SQLException se){
-			throw se;
-		}
-		finally{
-			if( ps != null){
-				try{
-					ps.close();
-				}
-				catch( SQLException se){
-				}
-			}
-			if( c != null){
-				try{
-					c.close();
-				}
-				catch( SQLException se){
-				}
-			}
-
-		}
 	}
 
 	/**
