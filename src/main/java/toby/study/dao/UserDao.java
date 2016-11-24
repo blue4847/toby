@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import toby.study.dao.strategy.DeleteAllStatement;
 import toby.study.domain.User;
 
 /**
@@ -16,7 +17,7 @@ import toby.study.domain.User;
  * 
  * @author blue4
  */
-public abstract class UserDao {
+public class UserDao {
 
 	private String INSERT = "INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)";
 	private String SELECT = "select * from users where id = ?";
@@ -49,10 +50,10 @@ public abstract class UserDao {
 			ps.setString(3, user.getPassword());
 
 			ps.executeUpdate();
-			
+
 		}
-		catch(SQLException se){
-			throw se; 
+		catch( SQLException se){
+			throw se;
 		}
 		finally{
 			if( ps != null){
@@ -69,7 +70,7 @@ public abstract class UserDao {
 				catch( SQLException se){
 				}
 			}
-			
+
 		}
 	}
 
@@ -131,39 +132,18 @@ public abstract class UserDao {
 				catch( SQLException se){
 				}
 			}
-		} 
+		}
 	}
 
 	public void deleteAll() throws SQLException {
+		/** micro DI */
+		
+		// Create object of strategy made for this method
+		StatementStrategy stmt = new DeleteAllStatement();
+		
+		// call context, transfer strategy object
+		this.jdbcContextWithStatementStrategy(stmt);
 
-		Connection c = null;
-		PreparedStatement ps = null;
-
-		try{
-			c = dataSource.getConnection();
-			ps = makeStatement(c);
-			ps.executeUpdate();
-		}
-		catch( SQLException se){
-			throw se;
-		}
-		finally{
-			if( ps != null){
-				try{
-					ps.close();
-				}
-				catch( SQLException se){
-				}
-			}
-			if( c != null){
-				try{
-					c.close();
-				}
-				catch( SQLException se){
-				}
-			}
-
-		}
 	}
 
 	public int getCount() throws SQLException {
@@ -172,8 +152,8 @@ public abstract class UserDao {
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try{
-			c = dataSource.getConnection(); 
-			ps = c.prepareStatement("SELECT COUNT(*) FROM USERS"); 
+			c = dataSource.getConnection();
+			ps = c.prepareStatement("SELECT COUNT(*) FROM USERS");
 			rs = ps.executeQuery();
 			rs.next();
 			int count = rs.getInt(1);
@@ -205,9 +185,39 @@ public abstract class UserDao {
 				catch( SQLException se){
 				}
 			}
-		} 
+		}
 	}
-	
-	abstract PreparedStatement makeStatement(Connection c) throws SQLException;
+
+	public void jdbcContextWithStatementStrategy( StatementStrategy stmt) throws SQLException {
+		Connection c = null;
+		PreparedStatement ps = null;
+		try{
+			c = dataSource.getConnection();
+
+			ps = stmt.makePreparedStatement(c);
+
+			ps.executeUpdate();
+		}
+		catch( SQLException se){
+			throw se;
+		}
+		finally{
+			if( ps != null){
+				try{
+					ps.close();
+				}
+				catch( SQLException se){
+				}
+			}
+			if( c != null){
+				try{
+					c.close();
+				}
+				catch( SQLException se){
+				}
+			}
+		}
+
+	}
 
 }
