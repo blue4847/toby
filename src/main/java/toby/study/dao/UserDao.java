@@ -9,8 +9,6 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 
-import toby.study.dao.strategy.AddStatement;
-import toby.study.dao.strategy.DeleteAllStatement;
 import toby.study.domain.User;
 
 /**
@@ -20,7 +18,6 @@ import toby.study.domain.User;
  */
 public class UserDao {
 
-	private String INSERT = "INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)";
 	private String SELECT = "select * from users where id = ?";
 
 	/** DI property area */
@@ -37,14 +34,29 @@ public class UserDao {
 	 * @param user
 	 * @throws SQLException
 	 */
-	public void add( User user) throws SQLException {
+	public void add( final User user) throws SQLException {
 		/** micro DI */
-		
+
 		// Create object of strategy made for this method
-		StatementStrategy stmt = new AddStatement( user);
-		
-		// call context, transfer strategy object
-		this.jdbcContextWithStatementStrategy(stmt);
+		/**
+		 * 내부클래스로 정의함으로서 메소드 레벨에서 사용되는 변수를 사용할 수 있다.
+		 * 따라서 기존의 생성자를 통해 강제했던 변수 전달을 생략할 수 있다.
+		 * 단, 내부 클래스에서 외부의 변수를 사용할 때는 외부 변수를 반드시 final로 선언해주어야 한다.
+		 * 
+		 * @author blue4
+		 */ 
+		this.jdbcContextWithStatementStrategy(
+				new StatementStrategy(){
+					public PreparedStatement makePreparedStatement( Connection c) throws SQLException {
+						PreparedStatement ps = c.prepareStatement("INSERT INTO USERS(ID, NAME, PASSWORD) VALUES(?,?,?)");
+
+						ps.setString(1, user.getId());
+						ps.setString(2, user.getName());
+						ps.setString(3, user.getPassword());
+
+						return ps;
+					}
+				});
 
 	}
 
@@ -111,12 +123,13 @@ public class UserDao {
 
 	public void deleteAll() throws SQLException {
 		/** micro DI */
-		
-		// Create object of strategy made for this method
-		StatementStrategy stmt = new DeleteAllStatement();
-		
-		// call context, transfer strategy object
-		this.jdbcContextWithStatementStrategy(stmt);
+
+		this.jdbcContextWithStatementStrategy(
+				new StatementStrategy(){
+					public PreparedStatement makePreparedStatement( Connection c) throws SQLException {
+						return c.prepareStatement("DELETE FROM USERS");
+					}
+				});
 
 	}
 
