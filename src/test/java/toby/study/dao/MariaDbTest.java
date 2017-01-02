@@ -37,8 +37,8 @@ public class MariaDbTest {
 
 		// connection check
 		boolean reachable = conn.isValid(10);
-		
-		// result 
+
+		/* result */
 		assertTrue(reachable); 
 	}
 }
