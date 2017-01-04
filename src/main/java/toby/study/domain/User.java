@@ -1,67 +1,102 @@
 package toby.study.domain;
 
-/** UserTable model */
+/**
+ * UserTable model
+ */
 public class User {
-	
-	public User( String id, String name, String password){
-		this.id = id;
-		this.name = name;
-		this.password = password; 
-	}
-	
-	/** 
-	 * default constructor
-	 * 자바빈의 규약을 따르는 클래스에 생성자를 명시적으로 추가했을 때는
-	 * 파라미터가 없는 디폴트 생성자도 함께 정의해 주도록 할 것.
-	 */
-	public User(){
-	}
 
-	/**
-	 * ID
-	 */
-	private String id;
-	
-	/**
-	 * NAME
-	 */
-	private String name;
-	
-	/**
-	 * PASSWORD
-	 */
-	private String password;
+    public User(String id, String name, String password, Level level, int login, int recommend) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.level = level;
+        this.login = login;
+        this.recommend = recommend;
+    }
 
-	/**
-	 * get ID
-	 * @return ID
-	 */
-	public String getId() {
-		return id;
-	}
+    /**
+     * default constructor
+     * 자바빈의 규약을 따르는 클래스에 생성자를 명시적으로 추가했을 때는
+     * 파라미터가 없는 디폴트 생성자도 함께 정의해 주도록 할 것.
+     */
+    public User() {
+    }
 
-	/**
-	 * set ID
-	 * @param id
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * ID
+     */
+    private String id;
 
-	public String getName() {
-		return name;
-	}
+    /**
+     * NAME
+     */
+    private String name;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * PASSWORD
+     */
+    private String password;
 
-	public String getPassword() {
-		return password;
-	}
+    /**
+     * Level
+     */
+    private Level level;
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    /**
+     * Login count
+     */
+    int login;
 
+    /**
+     * recommended count
+     */
+    int recommend;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Level getLevel() {
+        return level;
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
+    public int getLogin() {
+        return login;
+    }
+
+    public void setLogin(int login) {
+        this.login = login;
+    }
+
+    public int getRecommend() {
+        return recommend;
+    }
+
+    public void setRecommend(int recommend) {
+        this.recommend = recommend;
+    }
 }

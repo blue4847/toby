@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import toby.study.Exception.DuplicateUserIdException;
+import toby.study.domain.Level;
 import toby.study.domain.User;
 
 /**
@@ -37,6 +38,9 @@ public class UserDaoJdbc implements UserDao {
             user.setId(rs.getString("ID"));
             user.setName(rs.getString("NAME"));
             user.setPassword(rs.getString("PASSWORD"));
+            user.setLevel(Level.valueOf(rs.getInt("LEVEL")));
+            user.setLogin(rs.getInt("LOGIN"));
+            user.setRecommend(rs.getInt("RECOMMEND"));
             return user;
         }
     };
@@ -56,8 +60,8 @@ public class UserDaoJdbc implements UserDao {
      * @param user
      */
     public void add(final User user) throws DuplicateKeyException {
-        this.jdbcTemplate.update("INSERT INTO USERS ( ID, NAME, PASSWORD) VALUES (?, ?, ?)",
-                user.getId(), user.getName(), user.getPassword());
+        this.jdbcTemplate.update("INSERT INTO USERS ( ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND) VALUES (?, ?, ?, ?, ?, ?)",
+                user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend());
     }
 
     /**
@@ -81,7 +85,7 @@ public class UserDaoJdbc implements UserDao {
      */
     public List<User> getAll() {
         return this.jdbcTemplate.query(
-                "select * from users order by id"
+                "SELECT * FROM USERS ORDER BY ID"
                 , this.userMapper
         );
     }
@@ -102,4 +106,8 @@ public class UserDaoJdbc implements UserDao {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS", Integer.class);
     }
 
+    public void update(User user) {
+        this.jdbcTemplate.update("UPDATE USERS SET NAME = ?, PASSWORD = ?, LEVEL = ?, LOGIN = ?, RECOMMEND = ? WHERE ID = ?"
+                , user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend(), user.getId());
+    }
 }

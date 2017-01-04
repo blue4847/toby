@@ -15,9 +15,12 @@
 	</bean>
 	
 	<bean id="countingUserDao" class="toby.study.dao.UserDaoJdbc">
-
 		<!-- dataSource : spring-connection.xml -->
 		<property name="dataSource" ref="countingDataSource">
 		</property>
+	</bean>
+
+	<bean id="userService" class="toby.study.service.UserService">
+        <property name="userDao" ref = "userDao"/>
 	</bean>
 </beans>

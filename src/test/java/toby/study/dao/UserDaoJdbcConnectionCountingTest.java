@@ -14,6 +14,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import toby.study.domain.Level;
 import toby.study.domain.User;
 
 /**
@@ -59,9 +60,9 @@ public class UserDaoJdbcConnectionCountingTest {
 	public void setUp() throws SQLException{ 
 		userDao.setDataSource(countingDataSource);
 
-		user1 = new User("homuhomu", "호무라", "pw00");
-		user2 = new User("madoka", "마도카", "pw11");
-		user3 = new User("mamiru", "마미", "pw22");
+		user1 = new User("homuhomu", "호무라", "pw00", Level.BASIC, 1, 0);
+		user2 = new User("madoka", "마도카", "pw11", Level.SILVER, 55, 10);
+		user3 = new User("mamiru", "마미", "pw22", Level.GOLD, 100, 40);
 
 		// singleton object인가를 확인하기 위해, 1회 카운트
 		countingUserDao.get(user1.getId());
