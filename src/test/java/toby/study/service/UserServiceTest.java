@@ -18,7 +18,7 @@ import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- * Created by blue4 on 2017-01-04.
+ * UserService Test class
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"})
@@ -40,11 +40,11 @@ public class UserServiceTest {
     @Before
     public void setUp() {
         users = Arrays.asList(
-                new User("homuhomu", "", "pw01", Level.BASIC, 49, 0)
-                , new User("mamimami", "", "pw02", Level.BASIC, 50, 0)
-                , new User("madomado", "", "pw03", Level.SILVER, 60, 29)
-                , new User("ruliruli", "", "pw04", Level.SILVER, 60, 30)
-                , new User("mikumiku", "", "pw05", Level.GOLD, 100, 100)
+                new User("homuhomu", "ほむほむ", "pw01", Level.BASIC, 49, 0)
+                , new User("mamimami", "まみまみ", "pw02", Level.BASIC, 50, 0)
+                , new User("madomado", "まどまど", "pw03", Level.SILVER, 60, 29)
+                , new User("ruliruli", "ルリルリ", "pw04", Level.SILVER, 60, 30)
+                , new User("mikumiku", "ミクミク", "pw05", Level.GOLD, 100, 100)
         );
     }
 
@@ -66,5 +66,25 @@ public class UserServiceTest {
     private void checkLevel(User user, Level expectedLevel) {
         User userUpdate = userDao.get(user.getId());
         assertThat(userUpdate.getLevel(), is(expectedLevel));
+    }
+
+    @Test
+    public void add() {
+        userDao.deleteAll();
+
+        User userWithLevel = users.get(4);
+
+        User userWithoutLevel = users.get(0);
+        userWithoutLevel.setLevel(null);
+
+        userService.add(userWithLevel);
+        userService.add(userWithoutLevel);
+
+        User userWithLevelRead = userDao.get(userWithLevel.getId());
+        User userWithoutLevelRead = userDao.get(userWithoutLevel.getId());
+
+        assertThat(userWithLevelRead.getLevel(), is(userWithLevel.getLevel()));
+        assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
+
     }
 }

@@ -7,11 +7,12 @@ import toby.study.domain.User;
 import java.util.List;
 
 /**
- * Created by blue4 on 2017-01-04.
+ * Userに関するサービスを提供
+ *
  */
 public class UserService {
 
-    UserDao userDao;
+    private UserDao userDao;
 
     public void setUserDao(UserDao userDao) {
         this.userDao = userDao;
@@ -37,8 +38,11 @@ public class UserService {
             }
 
         }
+    }
 
-
+    public void add(User user){
+        if( user.getLevel() == null) user.setLevel(Level.BASIC);
+        userDao.add(user);
     }
 
 }
