@@ -22,6 +22,16 @@ public class User {
     public User() {
     }
 
+    public void upgradeLevel(){
+        Level nextLevel = this.level.nextLevel();
+        if(nextLevel == null){
+            throw new IllegalStateException(this.level + " : this level cannot be upgraded ");
+        }
+        else{
+            this.level = nextLevel;
+        }
+    }
+
     /**
      * ID
      */
@@ -99,4 +109,5 @@ public class User {
     public void setRecommend(int recommend) {
         this.recommend = recommend;
     }
+
 }
