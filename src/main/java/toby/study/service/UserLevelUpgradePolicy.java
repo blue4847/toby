@@ -8,5 +8,5 @@ import toby.study.domain.User;
 public interface UserLevelUpgradePolicy {
     boolean canUpgradeLevel(User user);
 
-    void upgradeLevels(User user);
+    void upgradeLevel(User user);
 }

@@ -6,12 +6,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import static org.junit.Assert.fail;
 import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_LOGCOUNT_FOR_SILVER;
 import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_RECOMMEND_FOR_GOLD;
 import toby.study.dao.UserDao;
 import toby.study.domain.Level;
 import toby.study.domain.User;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +35,9 @@ public class UserServiceTest {
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    DataSource dataSource;
+
     @Test
     public void bean() {
         assertThat(this.userService, is(notNullValue()));
@@ -51,7 +57,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void upgradeLevel() {
+    public void upgradeLevel() throws Exception{
         userDao.deleteAll();
         for (User user : users)
             userDao.add(user);
@@ -109,4 +115,54 @@ public class UserServiceTest {
         assertThat(userWithoutLevelRead.getLevel(), is(Level.BASIC));
 
     }
+
+    @Test
+    public void upgradeAllOrNothing() throws Exception{
+
+        UserLevelUpgradePolicy transactionPolicy = new TestPolicyUserUpgradeTransaction( users.get(3).getId());
+
+        UserService transactionService = new UserService();
+        transactionService.setUserDao(userDao);
+        transactionService.setDataSource(this.dataSource);
+        transactionService.setUserLevelUpgradePolicy(transactionPolicy);
+
+        userDao.deleteAll();
+        for( User user: users){
+            userDao.add(user);
+        }
+
+        try{
+            transactionService.upgradeLevels();
+            fail("TestUserServiceException expected");
+        }
+        catch(TestUserServiceException e){
+        }
+        checkLevelUpgraded(users.get(1), false);
+
+    }
+
+    /**
+     * user-upgrade policy for transaction test
+     */
+    static class TestPolicyUserUpgradeTransaction extends UserLevelUpgradePolicyLoginCountAndRecommend{
+        private String id;
+
+        private TestPolicyUserUpgradeTransaction(String id){
+            this.id = id;
+        }
+
+        public void upgradeLevel(User user){
+            if( user.getId().equals(this.id)) throw new TestUserServiceException();
+            super.upgradeLevel(user);
+        }
+    }
+
+    /**
+     * temp-exception for transaction test
+     */
+    static class TestUserServiceException extends RuntimeException{
+    }
+
+
+
 }

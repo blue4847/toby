@@ -32,7 +32,7 @@ public class UserLevelUpgradePolicyLoginCountAndRecommend implements UserLevelUp
         }
     }
 
-    public void upgradeLevels(User user) {
+    public void upgradeLevel(User user) {
         user.upgradeLevel();
     }
 }
