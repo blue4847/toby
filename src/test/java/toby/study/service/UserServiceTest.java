@@ -6,10 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import static org.junit.Assert.fail;
-import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_LOGCOUNT_FOR_SILVER;
-import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_RECOMMEND_FOR_GOLD;
+import org.springframework.transaction.PlatformTransactionManager;
 import toby.study.dao.UserDao;
 import toby.study.domain.Level;
 import toby.study.domain.User;
@@ -21,6 +18,9 @@ import java.util.List;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_LOGCOUNT_FOR_SILVER;
+import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_RECOMMEND_FOR_GOLD;
 
 /**
  * UserService Test class
@@ -37,6 +37,9 @@ public class UserServiceTest {
 
     @Autowired
     DataSource dataSource;
+
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @Test
     public void bean() {
@@ -63,12 +66,6 @@ public class UserServiceTest {
             userDao.add(user);
 
         userService.upgradeLevels();
-
-//        checkLevel(users.get(0), Level.BASIC);
-//        checkLevel(users.get(1), Level.SILVER);
-//        checkLevel(users.get(2), Level.SILVER);
-//        checkLevel(users.get(3), Level.GOLD);
-//        checkLevel(users.get(4), Level.GOLD);
 
         checkLevelUpgraded(users.get(0), false);
         checkLevelUpgraded(users.get(1), true);
@@ -124,6 +121,7 @@ public class UserServiceTest {
         UserService transactionService = new UserService();
         transactionService.setUserDao(userDao);
         transactionService.setDataSource(this.dataSource);
+        transactionService.setTransactionManager(this.transactionManager);
         transactionService.setUserLevelUpgradePolicy(transactionPolicy);
 
         userDao.deleteAll();

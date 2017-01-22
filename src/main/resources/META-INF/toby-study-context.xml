@@ -24,8 +24,19 @@
         <property name="userDao" ref = "userDao"/>
 		<property name="dataSource" ref = "dataSource"/>
 		<property name="userLevelUpgradePolicy" ref = "userLevelUpgradePolicy"/>
+        <property name="transactionManager" ref="transactionManager"/>
 	</bean>
-
+    <!--
+	* PlatformTransactionManager interface implementation classes
+	*
+	* DataSourceTransactionManager : JDBC local transaction
+	* JtaTransactionManager : JTA global transaction
+	* HibernateTransactionManager : Hibernate
+	-->
 	<bean id="userLevelUpgradePolicy" class="toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend"/>
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+	</bean>
 
 </beans>
