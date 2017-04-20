@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0" >
+
+    <persistence-unit name="hibernate_jpa" transaction-type="RESOURCE_LOCAL">
+        <provider> org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<!--
+			RDB와 매핑될 오브젝트인 엔티티 클래스들을 직접 지정할 수 있다.
+		 -->
+        <class>toby.study.domain.User</class>
+		<!--
+			엔티티 클래스를 자동스캔하지 않도록 지정한다. 이 태그를 제거하면 클래스 패스에서 @Entity 어노테이션이 붙은 모든 클래스를 자동 등록한다.
+		 -->
+		<!--<exclude-unlisted-classes />-->
+        <properties>
+			<!--
+				바이트코드 위빙 기능을 사용하지 않도록 설정한다. 
+				지연된 로딩 같은 기능을 사용하지 않거나 별도의 컴파일을 통해 엔티티 클래스를 확장할 경우 위빙을 사용하지 않도록 한다.  
+			 --> 
+            <!--<property name="hibernate.weaving"  value="false" />-->
+            <!--
+				이하의 프로퍼티 설정은 entityManagerFactory빈 설정에서 지정한 dataSource빈에서 가져오기에 필요 없음
+				<property name="hibernate.connection.driver" value="org.mariadb.jdbc.Driver"/>
+				<property name="hibernate.connection.url" value="jdbc:mariadb://localhost:3306/toby_study"/>
+				<property name="hibernate.connection.user" value="{user}"/>
+				<property name="hibernate.connection.password" value="{password}" />
+            -->
+        </properties>
+    </persistence-unit>
+</persistence>

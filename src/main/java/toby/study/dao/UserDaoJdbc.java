@@ -1,24 +1,15 @@
 package toby.study.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import toby.study.domain.Level;
+import toby.study.domain.User;
+
+import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
-import javax.sql.DataSource;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
-import toby.study.Exception.DuplicateUserIdException;
-import toby.study.domain.Level;
-import toby.study.domain.User;
 
 /**
  * Application Component<br>

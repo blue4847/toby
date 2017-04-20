@@ -36,9 +36,6 @@ public class UserServiceTest {
     UserDao userDao;
 
     @Autowired
-    DataSource dataSource;
-
-    @Autowired
     PlatformTransactionManager transactionManager;
 
     @Test
@@ -71,17 +68,20 @@ public class UserServiceTest {
         checkLevelUpgraded(users.get(1), true);
         checkLevelUpgraded(users.get(2), false);
         checkLevelUpgraded(users.get(3), true);
-        checkLevelUpgraded(users.get(4), false);
-
-
-
+        checkLevelUpgraded(users.get(4), false); 
     }
 
+	/**
+	 * Level 확인용 메소드
+	 */
     private void checkLevel(User user, Level expectedLevel) {
         User userUpdate = userDao.get(user.getId());
         assertThat(userUpdate.getLevel(), is(expectedLevel));
     }
 
+	/**
+	 * Level 업그레이드 여부 확인용 메소드
+	 */
     private void checkLevelUpgraded( User user, boolean upgraded){
         User userUpdate = userDao.get(user.getId());
         if( upgraded){
@@ -113,42 +113,60 @@ public class UserServiceTest {
 
     }
 
+	/**
+	 * UserService의 Transaction 여부를 확인
+	 */
     @Test
-    public void upgradeAllOrNothing() throws Exception{
+    public void upgradeAllOrNothing() throws Exception{ 
 
+		/**
+		 * Transaction테스트를 위한 수정된 UserService를 생성
+		 * 다른 테스트에 영향을 주지 않기위해 Spring 관리 UserService가 아닌 별도의 객체를 생성한다.
+		 */
         UserLevelUpgradePolicy transactionPolicy = new TestPolicyUserUpgradeTransaction( users.get(3).getId());
-
         UserService transactionService = new UserService();
         transactionService.setUserDao(userDao);
-        transactionService.setDataSource(this.dataSource);
         transactionService.setTransactionManager(this.transactionManager);
         transactionService.setUserLevelUpgradePolicy(transactionPolicy);
 
         userDao.deleteAll();
-        for( User user: users){
+        for( User user: users)
             userDao.add(user);
-        }
 
         try{
+			// Level Upgrade 실시
             transactionService.upgradeLevels();
+
+			// Transaction 예외가 발생하지 않을 경우, 테스트 실패
             fail("TestUserServiceException expected");
         }
         catch(TestUserServiceException e){
         }
-        checkLevelUpgraded(users.get(1), false);
-
+		// Rollback 확인
+        checkLevelUpgraded(users.get(1), false); 
     }
 
     /**
      * user-upgrade policy for transaction test
      */
     static class TestPolicyUserUpgradeTransaction extends UserLevelUpgradePolicyLoginCountAndRecommend{
+
+		/**
+		 * 테스트에 사용 될 예외 대상 ID
+		 */
         private String id;
 
+		/**
+		 * 테스트에 사용 될 예외 대상 ID를 지정한다.
+		 */
         private TestPolicyUserUpgradeTransaction(String id){
             this.id = id;
         }
 
+		/**
+		 * 테스트 전용 메소드로서, 생성시 설정한 ID와 동일한 ID의 User를 발견할 경우 예외를 발생시킨다.
+		 */
+		@Override
         public void upgradeLevel(User user){
             if( user.getId().equals(this.id)) throw new TestUserServiceException();
             super.upgradeLevel(user);

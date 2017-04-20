@@ -1,8 +1,17 @@
 package toby.study.domain;
 
+import toby.study.util.converter.LevelEnumConverter;
+
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 /**
  * UserTable model
  */
+@Entity
+@Table(name = "USERS")
 public class User {
 
     public User(String id, String name, String password, Level level, int login, int recommend) {
@@ -22,12 +31,11 @@ public class User {
     public User() {
     }
 
-    public void upgradeLevel(){
+    public void upgradeLevel() {
         Level nextLevel = this.level.nextLevel();
-        if(nextLevel == null){
+        if (nextLevel == null) {
             throw new IllegalStateException(this.level + " : this level cannot be upgraded ");
-        }
-        else{
+        } else {
             this.level = nextLevel;
         }
     }
@@ -35,6 +43,7 @@ public class User {
     /**
      * ID
      */
+    @Id
     private String id;
 
     /**
@@ -50,6 +59,7 @@ public class User {
     /**
      * Level
      */
+    @Convert(converter = LevelEnumConverter.class)
     private Level level;
 
     /**

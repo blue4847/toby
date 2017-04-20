@@ -7,6 +7,7 @@ import toby.study.dao.UserDao;
 import toby.study.domain.Level;
 import toby.study.domain.User;
 
+import javax.persistence.Id;
 import javax.sql.DataSource;
 import java.util.List;
 
@@ -19,8 +20,6 @@ public class UserService {
 
     private UserLevelUpgradePolicy userLevelUpgradePolicy;
 
-    private DataSource dataSource;
-
     private PlatformTransactionManager transactionManager;
 
     public void setUserDao(UserDao userDao) {
@@ -31,12 +30,21 @@ public class UserService {
         this.userLevelUpgradePolicy = userLevelUpgradePolicy;
     }
 
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
     public void setTransactionManager(PlatformTransactionManager transactionManager){
         this.transactionManager = transactionManager;
+    }
+
+    public void deleteAll() throws Exception{
+        /** get current transaction-status */
+        TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try {
+            this.userDao.deleteAll();
+        }
+        catch(Exception e){
+            this.transactionManager.rollback(status);
+            throw e;
+        }
     }
 
     public void upgradeLevels() throws Exception {
@@ -62,9 +70,28 @@ public class UserService {
         }
     }
 
-    public void add(User user) {
+    public void add(User user){
         if (user.getLevel() == null) user.setLevel(Level.BASIC);
         userDao.add(user);
+    }
+
+    public interface UpdateCallback{
+        void doWork();
+    }
+
+    private void updateTemplate(UpdateCallback callback) throws Exception{
+        /** get current transaction-status */
+        TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());
+
+        try{
+            callback.doWork();
+            this.transactionManager.commit(status);
+        }
+        catch(Exception e){
+            /** rollback */
+            this.transactionManager.rollback(status);
+            throw e;
+        }
     }
 
 }
