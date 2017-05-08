@@ -9,7 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 import toby.study.dao.UserDao;
-import toby.study.dao.UserDaoJdbc;
+import toby.study.dao.UserDaoJpa;
 import toby.study.domain.Level;
 import toby.study.domain.User;
 
@@ -26,18 +26,18 @@ import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MI
 /**
  * UserService Test class
  *
- * UserDao : UserDaoJdbc
+ * UserDao : UserDaoJpa
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"})
-public class UserServiceTest {
+public class UserServiceJpaTest {
 
     @Autowired
-    @Qualifier("userService")
+    @Qualifier("userServiceJpa")
     UserService userService;
 
     @Autowired
-    @Qualifier("userDao")
+    @Qualifier("userDaoJpa")
     UserDao userDao;
 
     @Autowired
@@ -46,7 +46,7 @@ public class UserServiceTest {
     @Test
     public void bean() {
         assertThat(this.userService, is(notNullValue()));
-        assertThat(true, is(this.userDao instanceof UserDaoJdbc));
+        assertThat(true, is(this.userDao instanceof UserDaoJpa));
     }
 
     List<User> users;

@@ -12,12 +12,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * Application Component<br>
- *
+ * Users 테이블에 관련된 데이터 엑세스 로직을 다룬다.
+ * JDBC를 이용하여 기능을 구현한다.
  * @author blue4
  */
 public class UserDaoJdbc implements UserDao {
 
+	/**
+	 * JDBC로직에 사용되는 템플릿 오브젝트
+	 */
     private JdbcTemplate jdbcTemplate;
 
     /**
@@ -38,7 +41,6 @@ public class UserDaoJdbc implements UserDao {
 
     /**
      * DataSource setter
-     *
      * @param dataSource
      */
     public void setDataSource(DataSource dataSource) {
@@ -47,9 +49,9 @@ public class UserDaoJdbc implements UserDao {
 
     /**
      * Add User Scheme
-     *
      * @param user
      */
+	@Override
     public void add(final User user) throws DuplicateKeyException {
         this.jdbcTemplate.update("INSERT INTO USERS ( ID, NAME, PASSWORD, LEVEL, LOGIN, RECOMMEND) VALUES (?, ?, ?, ?, ?, ?)",
                 user.getId(), user.getName(), user.getPassword(), user.getLevel().intValue(), user.getLogin(), user.getRecommend());
@@ -57,10 +59,10 @@ public class UserDaoJdbc implements UserDao {
 
     /**
      * Get User Scheme
-     *
      * @param id
-     * @return
+     * @return user
      */
+	@Override
     public User get(String id) {
         return this.jdbcTemplate.queryForObject(
                 "SELECT * FROM USERS WHERE ID = ?"
@@ -71,9 +73,9 @@ public class UserDaoJdbc implements UserDao {
 
     /**
      * get all users table records
-     *
-     * @return
+     * @return List<User> users
      */
+	@Override
     public List<User> getAll() {
         return this.jdbcTemplate.query(
                 "SELECT * FROM USERS ORDER BY ID"
@@ -84,15 +86,16 @@ public class UserDaoJdbc implements UserDao {
     /**
      * delete all data of users table
      */
+	@Override
     public void deleteAll() {
         this.jdbcTemplate.update("DELETE FROM USERS");
     }
 
     /**
      * get number of user
-     *
      * @return
      */
+	@Override
     public int getCount() {
         return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM USERS", Integer.class);
     }

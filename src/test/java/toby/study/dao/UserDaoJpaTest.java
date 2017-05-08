@@ -5,6 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -65,9 +68,13 @@ public class UserDaoJpaTest {
     /**
      * 매 Test완료 후 각 Transaction에 commit을 실시한다.
      */
-//    @After
+    @After
     public void after() {
-        txManager.commit(txStatus);
+        /**
+         *
+         */
+        if(!txStatus.isCompleted())
+            txManager.commit(txStatus);
     }
 
     @Test
@@ -110,9 +117,10 @@ public class UserDaoJpaTest {
     /**
      * EmptyResultDataAccessException의 발생 감지 테스트
      *
-     * @throws SQLException
+//     * @throws EmptyResultDataAccessException
      */
 //    @Test(expected = EmptyResultDataAccessException.class)
+    @Test
     public void getUserFailure() throws SQLException {
 
         dao.deleteAll();
@@ -120,7 +128,8 @@ public class UserDaoJpaTest {
         assertThat(dao.getCount(), is(0));
 
         // Exception throwing expected
-//        User user = dao.get("unknown_id");
+        User user = dao.get("unknown_id");
+        assertThat(dao.getCount(), is(0));
     }
 
     @Test
@@ -165,29 +174,28 @@ public class UserDaoJpaTest {
     }
 
     /**
-     * 동일 유저 등록시 DuplicateKeyException발생 확인
+     * 동일 유저 등록시 DataIntegrityViolationException발생 확인
      */
-//    @Test(expected = Exception.class)
+    @Test(expected = DataIntegrityViolationException.class)
     public void duplicateKey() throws Throwable{
-//        try{
-//            UserDaoJpa dao2 = (UserDaoJpa)dao;
-//            dao2.deleteAll();
-//
-//            dao2.add2(user1);
-//
-//            txManager.commit(txStatus);
-//            def = new DefaultTransactionDefinition();
-//            def.setName("SomeTx");
-//            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-//            txStatus = txManager.getTransaction(def);
-//            dao2.add2(user1);
-//            txManager.commit(txStatus);
-//
-//        }
-//        catch(Throwable t){
-//            t.printStackTrace();
-//            throw t;
-//        }
+        try{
+            dao.deleteAll();
+
+            dao.add(user1);
+
+            txManager.commit(txStatus);
+            def = new DefaultTransactionDefinition();
+            def.setName("SomeTx2");
+            def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
+            txStatus = txManager.getTransaction(def);
+            dao.add(user1);
+            txManager.commit(txStatus);
+
+        }
+        catch(Throwable t){
+            t.printStackTrace();
+            throw t;
+        }
     }
 
     @Test
@@ -209,4 +217,5 @@ public class UserDaoJpaTest {
         checkSameUser(user1, user1update);
         checkSameUser(user2, user2get);
     }
+
 }

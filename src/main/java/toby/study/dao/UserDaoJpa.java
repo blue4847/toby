@@ -1,5 +1,6 @@
 package toby.study.dao;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.annotation.Transactional;
 import toby.study.domain.User;
 
@@ -13,13 +14,15 @@ import java.util.List;
 
 
 /**
- * Created by blue4 on 2017-02-13.
+ * Users 테이블에 관련된 데이터 엑세스 로직을 다룬다.
+ * JPA를 이용하여 기능을 구현한다.
  */
 public class UserDaoJpa implements UserDao {
 
     /**
-     * @PersistenceContext의 기본 설정. type=..이하는 생략 가능
+     * JPA로직에 사용되는 EntityManager
      */
+	//@PersistenceContext의 기본 설정. type=..이하는 생략 가능
     @PersistenceContext(type = PersistenceContextType.TRANSACTION)
     private EntityManager entityManager;
 
@@ -28,7 +31,7 @@ public class UserDaoJpa implements UserDao {
     }
 
     @Override
-    public void add(User user) {
+    public void add(User user) throws DataIntegrityViolationException {
         entityManager.persist(user);
     }
 
@@ -55,8 +58,6 @@ public class UserDaoJpa implements UserDao {
         delete.from(User.class);
         entityManager.createQuery(delete).executeUpdate();
 //        entityManager.createNativeQuery("DELETE FROM USERS", User.class).executeUpdate();
-
-
     }
 
     @Override
