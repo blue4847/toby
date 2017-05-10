@@ -16,6 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import toby.study.domain.Level;
 import toby.study.domain.User;
+import toby.study.service.UserService;
 
 /**
  * @Runwith : 
@@ -52,18 +53,27 @@ public class UserDaoJdbcConnectionCountingTest {
 	@Autowired
 	private CountingDataSource countingDataSource;
 
+	@Autowired
+	private UserService userService;
+
 	private User user1;
 	private User user2;
 	private User user3;
 
 	@Before
-	public void setUp() throws SQLException{ 
-		userDao.setDataSource(countingDataSource);
+	public void setUp() throws Exception {
+
+		userService.deleteAll();
 
 		user1 = new User("homuhomu", "호무라", "pw00", Level.BASIC, 1, 0);
 		user2 = new User("madoka", "마도카", "pw11", Level.SILVER, 55, 10);
 		user3 = new User("mamiru", "마미", "pw22", Level.GOLD, 100, 40);
 
+		userService.add(user1);
+		userService.add(user2);
+		userService.add(user3);
+
+		userDao.setDataSource(countingDataSource);
 		// singleton object인가를 확인하기 위해, 1회 카운트
 		countingUserDao.get(user1.getId());
 	}

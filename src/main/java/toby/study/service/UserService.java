@@ -7,7 +7,16 @@ import toby.study.dao.UserDao;
 import toby.study.domain.Level;
 import toby.study.domain.User;
 
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Users 테이블에 대한 비지니스 로직을 다루는 Service클래스
@@ -16,20 +25,20 @@ import java.util.List;
  */
 public class UserService {
 
-	/**
-	 * Users 테이블에 대한 데이터 로직을 담은 DAO 인터페이스
-	 * 데이터 로직만을 다루며 각 데이터 엑세스 기술에 따라 구현된 DAO를 DI받는다
-	 */
+    /**
+     * Users 테이블에 대한 데이터 로직을 담은 DAO 인터페이스
+     * 데이터 로직만을 다루며 각 데이터 엑세스 기술에 따라 구현된 DAO를 DI받는다
+     */
     private UserDao userDao;
 
     /**
-	 * User의 Level에 관련된 로직을 담당하는 인터페이스
+     * User의 Level에 관련된 로직을 담당하는 인터페이스
      */
     private UserLevelUpgradePolicy userLevelUpgradePolicy;
 
     /**
      * 기술에 따른 트랜젝션 경계설정 로직을 추상화 하기 위한 TransactionManager
-	 * JDBC, JPA등 각 기술에 맞는 TransactionManager를 DI받는다
+     * JDBC, JPA등 각 기술에 맞는 TransactionManager를 DI받는다
      */
     private PlatformTransactionManager transactionManager;
 
@@ -45,45 +54,71 @@ public class UserService {
         this.transactionManager = transactionManager;
     }
 
-	/**
-	 * Users 테이블의 모든 데이터를 삭제
-	 */
+    /**
+     * Users 테이블의 모든 데이터를 삭제
+     */
     public void deleteAll() throws Exception {
-        this.updateTemplate(()-> {
+        this.updateTemplate(() -> {
             userDao.deleteAll();
         });
     }
 
-	/**
-	 * 모든 User의 업그레이드 가능 여부를 확인 후, 업그레이드 실시
-	 */
-    public void upgradeLevels()  throws Exception{
+    /**
+     * 모든 User의 업그레이드 가능 여부를 확인 후, 업그레이드 실시
+     */
+    public void upgradeLevels() throws Exception {
         this.updateTemplate(() -> {
             List<User> users = userDao.getAll();
             for (User user : users) {
                 if (userLevelUpgradePolicy.canUpgradeLevel(user)) {
                     userLevelUpgradePolicy.upgradeLevel(user);
                     userDao.update(user);
+                    sendUpgradeEMail(user);
                 }
             }
         });
     }
 
-	/**
-	 * User의 추가
-	 */
-    public void add(User user) throws Exception{
-		this.updateTemplate(() -> {
+    private void sendUpgradeEMail(User user) {
+        Properties props = new Properties();
+        props.put("mail.smtp.host", "mail.ksug.org");
+        Session s = Session.getInstance(props, null);
+
+        MimeMessage message = new MimeMessage(s);
+        try{
+            message.setFrom(new InternetAddress("useradmin@ksug.org"));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));
+
+            message.setSubject("Upgrade 안내");
+            message.setText("사용자님의 등급이 "+ user.getLevel().name() + "로 업그레이드되었습니다.");
+
+			Transport.send(message);
+
+        }
+        catch(AddressException e){
+            throw new RuntimeException(e);
+        }
+        catch(MessagingException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * User의 추가
+     */
+    public void add(User user) throws Exception {
+        this.updateTemplate(() -> {
             if (user.getLevel() == null) user.setLevel(Level.BASIC);
             userDao.add(user);
         });
     }
 
-	/**
-	 * User의 취득
-	 * @param id
-	 */
-    public User get(String id){
+    /**
+     * User의 취득
+     *
+     * @param id
+     */
+    public User get(String id) {
         return userDao.get(id);
     }
 
@@ -94,10 +129,11 @@ public class UserService {
         void update();
     }
 
-	/**
-	 * transactionManager의 설정과 commit, rollback을 담은 템플릿 메소드
-	 * @param callback
-	 */
+    /**
+     * transactionManager의 설정과 commit, rollback을 담은 템플릿 메소드
+     *
+     * @param callback
+     */
     private void updateTemplate(UpdateCallback callback) throws Exception {
         /** get current transaction-status */
         TransactionStatus status = this.transactionManager.getTransaction(new DefaultTransactionDefinition());

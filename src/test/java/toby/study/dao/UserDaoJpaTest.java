@@ -52,9 +52,9 @@ public class UserDaoJpaTest {
 
     @Before
     public void setUp() {
-        user1 = new User("homuhomu2", "호무라", "pw00", Level.BASIC, 1, 0);
-        user2 = new User("madoka2", "마도카", "pw11", Level.SILVER, 55, 10);
-        user3 = new User("mamiru2", "마미", "pw22", Level.GOLD, 100, 40);
+        user1 = new User("homuhomu2", "호무라", "pw00", Level.BASIC, 1, 0, "homu@mail.com");
+        user2 = new User("madoka2", "마도카", "pw11", Level.SILVER, 55, 10, "mado@mamika.saya");
+        user3 = new User("mamiru2", "마미", "pw22", Level.GOLD, 100, 40, "mami@ru.do");
 
         /**
          * Transaction 설정을 수동으로 잡아준다.
