@@ -27,6 +27,7 @@
         <property name="userDao" ref="userDao"/>
         <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
         <property name="transactionManager" ref="transactionManager"/>
+        <property name="mailSender" ref="mailSender" />
     </bean>
     <!--
 	* PlatformTransactionManager interface implementation classes
@@ -64,5 +65,10 @@
         <property name="userDao" ref="userDaoJpa"/>
         <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
         <property name="transactionManager" ref="transactionManagerJpa"/>
+        <property name="mailSender" ref="mailSender" />
+    </bean>
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="mail.server.com" />
     </bean>
 </beans>

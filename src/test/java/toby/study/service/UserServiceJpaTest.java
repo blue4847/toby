@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,7 +30,8 @@ import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MI
  * UserDao : UserDaoJpa
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"})
+@ContextConfiguration(locations = {"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"
+        , "/META-INF/toby-study-test-context.xml"})
 public class UserServiceJpaTest {
 
     @Autowired
@@ -39,6 +41,9 @@ public class UserServiceJpaTest {
     @Autowired
     @Qualifier("userDaoJpa")
     UserDao userDao;
+
+    @Autowired
+    MailSender dummyMailSender;
 
     @Autowired
     PlatformTransactionManager transactionManager;
@@ -132,6 +137,7 @@ public class UserServiceJpaTest {
         UserLevelUpgradePolicy transactionPolicy = new TestPolicyUserUpgradeTransaction( users.get(3).getId());
         UserService transactionService = new UserService();
         transactionService.setUserDao(userDao);
+        transactionService.setMailSender(dummyMailSender);
         transactionService.setTransactionManager(this.transactionManager);
         transactionService.setUserLevelUpgradePolicy(transactionPolicy);
 
