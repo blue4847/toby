@@ -3,8 +3,11 @@ package toby.study.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -22,6 +25,8 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_LOGCOUNT_FOR_SILVER;
 import static toby.study.service.UserLevelUpgradePolicyLoginCountAndRecommend.MIN_RECOMMEND_FOR_GOLD;
 
@@ -132,6 +137,58 @@ public class UserServiceJpaTest {
 
     }
 
+	/**
+	 * Mock Framework를 사용한 upgradeLevels 테스트.
+	 * Mockito 프레임워크를 사용하여 별도의 목 오브젝트의 구현 없이도 생성, 사용, 검증할 수 있다.
+	 */
+    @Test 
+    public void mockUpgradeLevels() throws Exception{
+        UserServiceImpl userServiceImpl = new UserServiceImpl();
+        userServiceImpl.setUserLevelUpgradePolicy(new UserLevelUpgradePolicyLoginCountAndRecommend());
+
+        /**
+         * 다이나믹한 목 오브젝트 생성과 메소드의 리턴 값 설정, 그리고 DI까지 3줄이면 충분하다.
+         */
+		// 아무런 기능이 없는 목 오브젝트의 생성
+        UserDao mockUserDao = mock(UserDao.class);
+		// getAll()에 사용자 목록을 리턴하도록 스텁 기능을 추가해준다.
+        when(mockUserDao.getAll()).thenReturn(this.users);
+        userServiceImpl.setUserDao(mockUserDao);
+
+        /**
+         * 리턴 값이 없는 메소드를 가진 목 오브젝트는 더욱 간단하게 만들 수 있다.
+         */
+        MailSender mockMailSender = mock(MailSender.class);
+        userServiceImpl.setMailSender(mockMailSender);
+
+        userServiceImpl.upgradeLevels();
+
+		/**
+		 * 목 오브젝트가 제공하는 검증 기능을 통해서 어떤 메소드가 몇 번 호출됐는지,
+		 * 파라미터는 무엇인지 확인할 수 있다.
+		 */
+		// update() 메소드가 총 2번 호출되었음을 확인함.
+        verify(mockUserDao, times(2)).update(any(User.class ));
+		// update() 메소드에 "mamimami" user가 파라미터로서 사용됐음을 확인한다.
+        verify(mockUserDao).update(users.get(1));
+		// "mamimami" user의 Level이 업그레이드 되어, BASIC 에서 SILVER로 업그레이드 됨을 확인한다.
+        assertThat(users.get(1).getLevel(), is(Level.SILVER));
+
+		// update() 메소드에 "ruliruli" user가 파라미터로서 사용됐음을 확인한다.
+        verify(mockUserDao).update(users.get(3));
+		// "ruliruli" user의 Level이 업그레이드 되어, SILVER 에서 GOLD로 업그레이드 됨을 확인한다.
+        assertThat(users.get(3).getLevel(), is(Level.GOLD));
+
+
+        ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class);
+		// 파라미터를 정밀하게 검사하기 위해 캡쳐할 수도 있다.
+        verify(mockMailSender, times(2)).send(mailMessageArg.capture());
+        List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
+		// 보내진 메일 리스트와 각 메일의 주소가 업그레이드 대상과 일치하는지 확인한다.
+        assertThat(mailMessages.get(0).getTo()[0], is(users.get(1).getEmail()));
+        assertThat(mailMessages.get(1).getTo()[0], is(users.get(3).getEmail()));
+
+    }
 	/**
 	 * Level 확인용 메소드.
 	 */
