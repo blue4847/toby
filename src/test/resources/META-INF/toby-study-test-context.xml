@@ -10,17 +10,28 @@
 >
 	<!-- 테스트를 위한 수정된 DI 설정을 가진 bean -->
 
-	<context:annotation-config /> 
-	<bean id="userService" class="toby.study.service.UserService">
-		<property name="userDao" ref="userDao"/>
+	<context:annotation-config />
+    <!-- Jdbc -->
+	<bean id="userServiceJdbc" class="toby.study.service.UserServiceTx">
+		<property name="userService" ref="userServiceImplJdbc" />
+		<property name="transactionManager" ref="transactionManagerJdbc"/>
+	</bean>
+
+	<bean id="userServiceImplJdbc" class="toby.study.service.UserServiceImpl">
+		<property name="userDao" ref="userDaoJdbc"/>
 		<property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
-		<property name="transactionManager" ref="transactionManager"/>
 		<property name="mailSender" ref="dummyMailSender" />
 	</bean>
-	<bean id="userServiceJpa" class="toby.study.service.UserService">
+
+	<!-- JPA -->
+	<bean id="userServiceJpa" class="toby.study.service.UserServiceTx">
+		<property name="userService" ref="userServiceImplJpa"/>
+		<property name="transactionManager" ref="transactionManagerJpa"/>
+	</bean>
+
+	<bean id="userServiceImplJpa" class="toby.study.service.UserServiceImpl">
 		<property name="userDao" ref="userDaoJpa"/>
 		<property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
-		<property name="transactionManager" ref="transactionManagerJpa"/>
 		<property name="mailSender" ref="dummyMailSender" />
 	</bean>
     <!-- 테스트를 위한 아무런 기능을 하지 않는 MailSender -->

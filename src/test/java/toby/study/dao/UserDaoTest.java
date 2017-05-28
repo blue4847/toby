@@ -20,15 +20,9 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-/**
- * @author blue4
- * @Runwith :
- * Spring의 테스트 컨텍스트 프레임워크의 JUnit 확장기능 지정
- * ApplicationContext를 관리
- * @ContextConfiguration :
- * 테스트 컨텍스트가 자동으로 만들어 줄 ApplicationContext의 위치 지정
- */
+// Spring의 테스트 컨텍스트 프레임워크의 JUnit 확장기능 지정
 @RunWith(SpringJUnit4ClassRunner.class)
+// 테스트 컨텍스트가 자동으로 만들어 줄 ApplicationContext의 위치 지정
 @ContextConfiguration(locations = {"/META-INF/spring-connection.xml", "/META-INF/toby-study-context.xml"})
 public class UserDaoTest {
 
@@ -44,7 +38,7 @@ public class UserDaoTest {
      *
      * @see toby spring 100p
      */
-    @Resource(name = "userDao")
+    @Resource(name = "userDaoJdbc")
     private UserDao dao;
 
     /**
