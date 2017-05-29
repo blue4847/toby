@@ -180,8 +180,8 @@ public class UserServiceJpaTest {
         assertThat(users.get(3).getLevel(), is(Level.GOLD));
 
 
+        // 파라미터를 정밀하게 검사하기 위해 캡쳐할 수도 있다.
         ArgumentCaptor<SimpleMailMessage> mailMessageArg = ArgumentCaptor.forClass(SimpleMailMessage.class);
-		// 파라미터를 정밀하게 검사하기 위해 캡쳐할 수도 있다.
         verify(mockMailSender, times(2)).send(mailMessageArg.capture());
         List<SimpleMailMessage> mailMessages = mailMessageArg.getAllValues();
 		// 보내진 메일 리스트와 각 메일의 주소가 업그레이드 대상과 일치하는지 확인한다.
