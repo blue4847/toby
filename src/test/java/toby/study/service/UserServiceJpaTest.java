@@ -17,9 +17,15 @@ import toby.study.dao.UserDao;
 import toby.study.dao.UserDaoJpa;
 import toby.study.domain.Level;
 import toby.study.domain.User;
+import toby.study.handler.TransactionHandler;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -237,15 +243,123 @@ public class UserServiceJpaTest {
     }
 
 	/**
-	 * UserService의 Transaction 여부를 확인
+	 * UserService의 Transaction 여부를 확인.
+	 * UserService interface를 직접 구현한 proxy 클래스를 사용.
 	 */
     @Test
-    public void upgradeAllOrNothing() throws Exception{ 
+    public void upgradeAllOrNothing() throws Exception{
+
+        upgradeAllOrNothing(userServiceImpl -> {
+            // UserService의 Transaction 처리용 클래스
+            UserServiceTx transactionServiceTx = new UserServiceTx();
+
+            // UserService의 비즈니스 로직 구현체를 DI받은 후, Tx클래스를 통해 서비스를 실행한다.
+            transactionServiceTx.setUserService(userServiceImpl);
+            transactionServiceTx.setTransactionManager(transactionManager);
+            return transactionServiceTx;
+        });
+    }
+
+	/**
+	 * UserService의 Transaction 여부를 확인.
+	 * dynamic proxy를 사용하여 구현.
+	 */
+    @Test
+    public void upgradeAllOrNothingDynamicProxy() throws Exception{
+
+        upgradeAllOrNothing(userServiceImpl ->{
+            TransactionHandler txHandler = new TransactionHandler();
+            txHandler.setTarget(userServiceImpl);
+            txHandler.setTransactionManager(transactionManager);
+
+            // transaction 경계설정이 필요한 메소드 패턴을 추가한다.
+            Set<String> patterns = Stream.of("upgradeLevels", "deleteAll", "add")
+                    .collect(Collectors.toCollection(HashSet::new));
+            txHandler.setPatterns(patterns);
+
+            // dynamic proxy를 생성한다.
+            UserService txUserService = (UserService) Proxy.newProxyInstance(
+                    // 동적으로 생성되는 dynamic proxy 클래스의 로딩에 사용할 클래스 로더
+                    getClass().getClassLoader()
+                    // 구현할 인터페이스
+                    // dynamic proxy는 한 번에 하나 이상의 interface를 구현할 수도 있다
+                    , new Class[]{ UserService.class}
+                    // 부가기능과 위임 코드를 담은 InvocationHandler
+                    , txHandler
+            );
+            return txUserService;
+        });
+
+    }
+
+    /**
+     * upgradeLevels의 transaction 처리 테스트를 위한 Callback 인터페이스.
+	 * 각 테스트에 사용하고자 하는 transaction 경계처리 구현 클래스를 반환한다.
+	 * 괜히 심심해서 callback-template 패턴으로 만들었다.
+     */
+    private interface UpgradeAllOrNothingCallback{
 
 		/**
-		 * Transaction테스트를 위한 수정된 UserService를 생성
-		 * 다른 테스트에 영향을 주지 않기위해 Spring 관리 UserService가 아닌 별도의 객체를 생성한다.
+		 * UserService의 transaction 경계처리 기능을 담은 proxy를 반환한다.
 		 */
+        UserService getUserServiceTx(UserServiceImpl userServiceImpl);
+    }
+
+    /**
+     * upgradeLevels의 transaction 처리 테스트를 위한 템플릿 메소드.
+	 * 각 테스트에 사용하고자 하는 transaction 경계처리 구현 클래스를 이용하여 transaction의 처리를 테스트한다.
+	 * 괜히 심심해서 callback-template 패턴으로 만들었다.
+     * @param callback
+     * @throws Exception
+     */
+    private void upgradeAllOrNothing( UpgradeAllOrNothingCallback callback) throws Exception{
+
+        /**
+         * Transaction테스트를 위한 수정된 UserService를 생성
+         * 다른 테스트에 영향을 주지 않기위해 Spring 관리 UserService가 아닌 별도의 객체를 생성한다.
+         */
+        // 특정 유저의 아이디를 업그레이드 할 경우, 예외를 내보내도록 하는 테스트용 업그레이드 정책
+        UserLevelUpgradePolicy transactionPolicy = new TestPolicyUserUpgradeTransaction( users.get(3).getId());
+
+        // UserService의 비즈니스 로직 구현 클래스
+        UserServiceImpl transactionServiceImpl = new UserServiceImpl();
+
+        // 수정된 LevelUpgradePolicy 및 필요 객체들을 DI받는다.
+        transactionServiceImpl.setUserLevelUpgradePolicy(transactionPolicy);
+        transactionServiceImpl.setUserDao(userDao);
+
+        // mock 오브젝트를 사용해서 테스트 하는 경우, 물론 XML을 통해서도 DI는 가능하지만
+        // 테스트상에서 명시하기 위해 수동으로 DI해주는 것이 좋다.
+        MockMailSender mockMailSender = new MockMailSender();
+        transactionServiceImpl.setMailSender(mockMailSender);
+
+        // UserService의 Transaction 경계처리 기능 구현 proxy 클래스
+        UserService transactionServiceTx = callback.getUserServiceTx(transactionServiceImpl);
+
+
+        transactionServiceTx.deleteAll();
+        for( User user: users)
+            transactionServiceTx.add(user);
+
+        try{
+            // Level Upgrade 실시
+            transactionServiceTx.upgradeLevels();
+
+            // Transaction 예외가 발생하지 않을 경우, 테스트 실패
+            fail("TestUserServiceException expected");
+        }
+        catch(TestUserServiceException e){
+        }
+        // Rollback 확인
+        checkLevelUpgraded(users.get(1), false);
+    }
+
+
+	/**
+	 * Transaction테스트를 위한 수정된 UserService를 생성
+	 * 다른 테스트에 영향을 주지 않기위해 Spring 관리 UserService가 아닌 별도의 객체를 생성한다.
+	 */
+	private UserServiceImpl transactionTestUserServiceImpl(){
 		// 특정 유저의 아이디를 업그레이드 할 경우, 예외를 내보내도록 하는 테스트용 업그레이드 정책
         UserLevelUpgradePolicy transactionPolicy = new TestPolicyUserUpgradeTransaction( users.get(3).getId());
 
@@ -261,30 +375,8 @@ public class UserServiceJpaTest {
         MockMailSender mockMailSender = new MockMailSender();
         transactionServiceImpl.setMailSender(mockMailSender);
 
-		// UserService의 Transaction 처리용 클래스
-        UserServiceTx transactionServiceTx = new UserServiceTx();
-
-		// UserService의 비즈니스 로직 구현체를 DI받은 후, Tx클래스를 통해 서비스를 실행한다.
-        transactionServiceTx.setUserService(transactionServiceImpl);
-        transactionServiceTx.setTransactionManager(transactionManager);
-
-        transactionServiceTx.deleteAll();
-        for( User user: users)
-            transactionServiceTx.add(user);
-
-        try{
-			// Level Upgrade 실시
-            transactionServiceTx.upgradeLevels();
-
-			// Transaction 예외가 발생하지 않을 경우, 테스트 실패
-            fail("TestUserServiceException expected");
-        }
-        catch(TestUserServiceException e){
-        }
-		// Rollback 확인
-        checkLevelUpgraded(users.get(1), false); 
-    }
-
+		return transactionServiceImpl; 
+	}
     /**
      * user-upgrade policy for transaction test
      */

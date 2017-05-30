@@ -31,7 +31,7 @@ public class UppercaseHandler implements InvocationHandler{
 		/**
 		 * 리턴 타입이 String이고 호출한 메소드의 이름이 "say"인 경우에만 대문자 변경 기능을 적용.
 		 */
-		if(ret instanceof String && method.getName().startWith("say"))
+		if(ret instanceof String && method.getName().startsWith("say"))
 			return ((String)ret).toUpperCase();
 		else
 			return ret;
