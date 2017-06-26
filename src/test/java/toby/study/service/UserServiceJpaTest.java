@@ -307,7 +307,7 @@ public class UserServiceJpaTest {
 
     /**
      * upgradeLevels의 transaction 처리 테스트를 위한 템플릿 메소드.
-	 * 각 테스트에 사용하고자 하는 transaction 경계처리 구현 클래스를 이용하여 transaction의 처리를 테스트한다.
+	 * 각 테스트에 사용하고자 하는 transaction 경계처리 구현 클래스를 이용하여 transaction 처리를 테스트한다.
 	 * 괜히 심심해서 callback-template 패턴으로 만들었다.
      * @param callback
      * @throws Exception

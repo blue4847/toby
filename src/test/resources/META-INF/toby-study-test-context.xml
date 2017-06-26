@@ -36,4 +36,9 @@
 	</bean>
     <!-- 테스트를 위한 아무런 기능을 하지 않는 MailSender -->
 	<bean id="dummyMailSender" class="toby.study.service.DummyMailSender" />
+
+	<!-- Dynamic Proxy생성 테스트를 위한 FactoryBean -->
+	<bean id="message" class="learningTest.spring.MessageFactoryBean" >
+        <property name="text" value="Factory Bean"/>
+	</bean>
 </beans>
