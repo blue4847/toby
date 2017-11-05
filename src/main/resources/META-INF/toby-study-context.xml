@@ -3,12 +3,12 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation=
-       "http://www.springframework.org/schema/beans
+               "http://www.springframework.org/schema/beans
 	   http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/context
        http://www.springframework.org/schema/context/spring-context.xsd"
 >
-    <context:annotation-config />
+    <context:annotation-config/>
 
     <!-- UserDaoJdbc -->
     <bean id="userDaoJdbc" class="toby.study.dao.UserDaoJdbc">
@@ -24,14 +24,14 @@
     </bean>
 
     <bean id="userServiceJdbc" class="toby.study.service.UserServiceTx">
-        <property name="userService" ref="userServiceImplJdbc" />
+        <property name="userService" ref="userServiceImplJdbc"/>
         <property name="transactionManager" ref="transactionManagerJdbc"/>
     </bean>
 
     <bean id="userServiceImplJdbc" class="toby.study.service.UserServiceImpl">
         <property name="userDao" ref="userDaoJdbc"/>
         <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
-        <property name="mailSender" ref="dummyMailSender" />
+        <property name="mailSender" ref="dummyMailSender"/>
     </bean>
     <!--
 	* PlatformTransactionManager interface implementation classes
@@ -48,23 +48,23 @@
 
     <!-- JPA -->
     <bean id="emf"
-          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" >
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
         <property name="dataSource" ref="dataSource"/>
-        <property name="persistenceXmlLocation" value="META-INF/spring-persistence.xml" />
+        <property name="persistenceXmlLocation" value="META-INF/spring-persistence.xml"/>
         <!--<property name="persistenceUnitName" value="hibernate_jpa" />-->
         <property name="jpaVendorAdapter">
-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" >
-                <property name="showSql" value="true" />
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="true"/>
             </bean>
         </property>
     </bean>
 
     <bean id="transactionManagerJpa"
           class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="emf" />
+        <property name="entityManagerFactory" ref="emf"/>
     </bean>
 
-    <bean id="userDaoJpa" class="toby.study.dao.UserDaoJpa" />
+    <bean id="userDaoJpa" class="toby.study.dao.UserDaoJpa"/>
 
     <bean id="userServiceJpa" class="toby.study.service.UserServiceTx">
         <property name="userService" ref="userServiceImplJpa"/>
@@ -74,6 +74,54 @@
     <bean id="userServiceImplJpa" class="toby.study.service.UserServiceImpl">
         <property name="userDao" ref="userDaoJpa"/>
         <property name="userLevelUpgradePolicy" ref="userLevelUpgradePolicy"/>
-        <property name="mailSender" ref="dummyMailSender" />
+        <property name="mailSender" ref="dummyMailSender"/>
+    </bean>
+
+    <!-- userService by Spring's FactoryBean -->
+    <!-- FactoryBean setting-->
+    <!-- FactoryBean -->
+    <bean id="userServiceTxJpa" class="toby.study.proxy.TxProxyFactoryBean">
+        <property name="target" ref="userServiceImplJpa"/>
+        <property name="transactionManager" ref="transactionManagerJpa"/>
+        <property name="patterns">
+            <list>
+                <value>upgradeLevels</value>
+                <value>deleteAll</value>
+                <value>add</value>
+            </list>
+        </property>
+        <property name="serviceInterface" value="toby.study.service.UserService"/>
+    </bean>
+
+    <!-- ProxyFactoryBean setting -->
+    <!-- advice -->
+    <bean id="transactionAdviceJpa" class="toby.study.proxy.TransactionAdvice">
+        <property name="transactionManager" ref="transactionManagerJpa"/>
+    </bean>
+    <!-- pointcut -->
+    <bean id="transactionPointcut" class="org.springframework.aop.support.NameMatchMethodPointcut">
+        <property name="mappedNames">
+            <list>
+                <value>upgrade*</value>
+                <value>deleteAll</value>
+                <value>add</value>
+            </list>
+        </property>
+    </bean>
+    <!-- advisor -->
+    <bean id="transactionAdvisorJpa" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="transactionAdviceJpa"/>
+        <property name="pointcut" ref="transactionPointcut"/>
+    </bean>
+    <!-- ProxyFactoryBean -->
+    <bean id="userServiceJpaByProxyFactoryBean" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="target" ref="userServiceImplJpa" />
+        <!-- you can set multiple advices or advisors -->
+        <property name="interceptorNames">
+            <list>
+                <!-- write ids in the value, not ref -->
+                <value>transactionAdvisorJpa</value>
+            </list>
+        </property>
     </bean>
 </beans>

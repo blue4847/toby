@@ -24,9 +24,9 @@ public class UserLevelUpgradePolicyLoginCountAndRecommend implements UserLevelUp
         Level currentLevel = user.getLevel();
         switch (currentLevel) {
             case BASIC:
-                return (user.getLogin() >= this.MIN_LOGCOUNT_FOR_SILVER);
+                return (user.getLogin() >= MIN_LOGCOUNT_FOR_SILVER);
             case SILVER:
-                return (user.getRecommend() >= this.MIN_RECOMMEND_FOR_GOLD);
+                return (user.getRecommend() >= MIN_RECOMMEND_FOR_GOLD);
             case GOLD:
                 return false;
             default:
